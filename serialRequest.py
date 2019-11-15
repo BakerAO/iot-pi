@@ -3,8 +3,9 @@ import requests
 import json
 
 port = serial.Serial(
-  '/dev/cu.SLAB_USBtoUART',
+  # '/dev/cu.SLAB_USBtoUART',
   # '/dev/ttyUSB0',
+  '/dev/ttyAMA0',
   115200, 8, 'N', 1, 1
 )
 
@@ -45,10 +46,11 @@ while True:
     }
 
     # url = "https://api.innov8.host/devices/thermometers"
-    url = 'http://192.168.1.13/devices/thermometers'
-    headers = {'content-type': 'application/json'}
-    try:
-      response = requests.post(url, headers=headers, data=json.dumps(data))
-      print(response)
-    except:
-      print('Bad Connection')
+    # url = 'http://192.168.1.13/devices/thermometers'
+    # headers = {'content-type': 'application/json'}
+    # try:
+    #   response = requests.post(url, headers=headers, data=json.dumps(data))
+    #   print(response)
+    # except:
+    #   print('Bad Connection')
+    print(json.dumps(data))
