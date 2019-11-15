@@ -5,7 +5,7 @@ import json
 port = serial.Serial(
   # '/dev/cu.SLAB_USBtoUART',
   # '/dev/ttyUSB0',
-  '/dev/ttyAMA0',
+  '/dev/ttyS0',
   115200, 8, 'N', 1, 1
 )
 
