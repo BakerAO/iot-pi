@@ -1,0 +1,17 @@
+Line-ending: NL and CR
+Baud: 115200
+
+Commands:
+AT
+
+AT+ADDRESS=1-64000
+
+AT+NETWORKID=1-15
+
+AT+SEND={address or 0 sends to all addresses},{bytes up to 240},{payload in ASCII}
+AT+SEND=3,5,Hello
+
+AT+CPIN={password}
+    00000000000000000000000000000001 to FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
++RCV=<Transmitter Address ID>,<Data Length>,<Data>,<Received Signal Strength Indicator>,<Signal-to-noise ratio>\r\n,
