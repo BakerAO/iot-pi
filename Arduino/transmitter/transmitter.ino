@@ -26,15 +26,13 @@ void setup()
 
 void loop()
 {
-  delay(1000);
-  Serial.println("Transmitting...");
-  
+  delay(3000);
   char radiopacket[20] = "Hello World #      ";
   itoa(packetnum++, radiopacket+13, 10);
-  Serial.print("Sending "); Serial.println(radiopacket);
+  Serial.print("Sending ");
+  Serial.println(radiopacket);
   radiopacket[19] = 0;
-  
-  Serial.println("Sending...");
+
   delay(10);
   rf95.send((uint8_t *)radiopacket, 20);
  
