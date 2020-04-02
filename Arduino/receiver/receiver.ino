@@ -26,7 +26,7 @@ void setup() {
   delay(100);
 
   tft.begin();
-  tft.setRotation(3);
+  tft.setRotation(1);
   tft.fillScreen(HX8357_BLACK);
   tft.setCursor(0, 0);
   tft.setTextColor(HX8357_WHITE);
