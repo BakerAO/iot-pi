@@ -15,6 +15,12 @@ void setup() {
   digitalWrite(RFM95_RST, HIGH);
   delay(100);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(100);
+
   rf95.init();
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
@@ -35,5 +41,8 @@ void loop() {
 }
 
 void sendText(String message) {
-  Serial.print(message);
+  Serial.println(message);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
 }
