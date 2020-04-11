@@ -75,14 +75,17 @@ String readSensor() {
     // convert to millilitres.
     flowMilliLitres = (flowRate / 60) * 1000;
     totalMilliLitres += flowMilliLitres;
+
+    reading += "{ \"deviceId\": 10001";
     
     // Litres per minute
-    reading += "flowRate-";
+    reading += ", \"flowRate\": ";
     reading += String(int(flowRate));
 
     // Litres
-    reading += " totalOutput-";
+    reading += ", \"totalOutput\": ";
     reading += String(totalMilliLitres/1000);
+    reading += " }";
     
     pulseCount = 0;
     // Enable the interrupt again now that we've finished sending output
