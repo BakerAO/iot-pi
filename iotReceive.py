@@ -11,8 +11,8 @@ while True:
     headers = {'content-type': 'application/json'}
     print(rcvString)
 
-    try:
-      response = requests.post(url, headers=headers, data=rcvString)
-      print(response)
-    except:
-      print('Bad Connection')
+    # try:
+    #   response = requests.post(url, headers=headers, data=rcvString)
+    #   print(response)
+    # except:
+    #   print('Bad Connection')
