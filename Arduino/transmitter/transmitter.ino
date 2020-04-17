@@ -11,12 +11,16 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 unsigned long lastTrans;
+int deviceId = 10001;
 
 String readSensor() {
-  float t = dht.readTemperature();
-  float h = dht.readHumidity();
-  String reading = "temp-" + String(t);
-  reading += ", hum-" + String(h);
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+  String reading = "{ ";
+  reading += "\"device_id\": " + String(deviceId); 
+  reading += ", \"temperature\": " + String(temperature);
+  reading += ", \"humidity\": " + String(humidity);
+  reading += " }";
   return reading;
 }
 
