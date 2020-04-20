@@ -13,6 +13,7 @@ while True:
     headers = {'content-type': 'application/json'}
 
     try:
+      print(rcvString)
       response = requests.post(url, headers=headers, data=rcvString)
       print(response)
     except:
