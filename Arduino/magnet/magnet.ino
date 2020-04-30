@@ -8,18 +8,18 @@
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 unsigned long lastTrans;
-String deviceId = 10001;
+String deviceId = "10003";
 int digitalInPin = 12;
 int ledPin = 13;
 
 String readSensor() {
   boolean stat = digitalRead(digitalInPin);
-  Serial.writeln(stat)
-  if (stat == HIGH) {
-    digitalWrite(ledPin,LOW);
+  if (stat) {
+    digitalWrite(ledPin, LOW);
   } else {
-    digitalWrite(ledPin,HIGH);
+    digitalWrite(ledPin, HIGH);
   }
+
   String reading = "{ ";
   reading += "\"device_id\": " + deviceId;
   reading += ", \"magnet\": " + String(stat);
@@ -35,6 +35,8 @@ void sendMessage(String message) {
   rf95.send((uint8_t *)radiopacket, n);
   delay(10);
   rf95.waitPacketSent();
+
+//  Serial.println(radiopacket);
 }
 
 void setup() {
@@ -53,15 +55,13 @@ void setup() {
   pinMode(digitalInPin,INPUT);
   pinMode(ledPin,OUTPUT);
 
-  Serial.begin(115200);
+//  Serial.begin(115200);
 }
 
 void loop() {
-  if (millis() > lastTrans + 2000) {
+  if (millis() > lastTrans + 3000) {
     String message = readSensor();
     sendMessage(message);
     lastTrans = millis();
-
-  Serial.println(radiopacket);
   }
 }
