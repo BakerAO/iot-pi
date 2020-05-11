@@ -29,20 +29,43 @@ void setup() {
 }
  
 void loop() {
+  receiveLoRa();
+  receiveSerial();
+}
+
+void receiveLoRa() {
   if (rf95.available()) {
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
     if (rf95.recv(buf, &len)) {
       String message = (char*)buf;
-      sendText(message);
+      sendSerialText(message);
     }
   }
-  delay(1000);
+  delay(500);
 }
 
-void sendText(String message) {
+void sendSerialText(String message) {
   Serial.println(message);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
+}
+
+void receiveSerial() {
+  String serialFromPi = Serial.readString();
+  if (serialFromPi.length() > 1) {
+    sendLoRaMessage(serialFromPi);
+  }
+}
+
+void sendLoRaMessage(String message) {
+  Serial.println(message);
+  int n = message.length() + 1;
+  char radiopacket[n];
+  strcpy(radiopacket, message.c_str());
+  delay(10);
+  rf95.send((uint8_t *)radiopacket, n);
+  delay(10);
+  rf95.waitPacketSent();
 }

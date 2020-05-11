@@ -15,6 +15,7 @@ unsigned long totalMilliLitres;
 unsigned long oldTime;
 // The hall-effect flow sensor outputs approximately 4.5 pulses per second per litre/minute of flow.
 float calibrationFactor = 4.5;
+String deviceId = "10004";
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -76,14 +77,14 @@ String readSensor() {
     flowMilliLitres = (flowRate / 60) * 1000;
     totalMilliLitres += flowMilliLitres;
 
-    reading += "{ \"deviceId\": 10001";
+    reading += "{ \"device_id\": " + deviceId;
     
     // Litres per minute
-    reading += ", \"flowRate\": ";
+    reading += ", \"flow_rate\": ";
     reading += String(int(flowRate));
 
     // Litres
-    reading += ", \"totalOutput\": ";
+    reading += ", \"total_output\": ";
     reading += String(totalMilliLitres/1000);
     reading += " }";
     
@@ -91,7 +92,11 @@ String readSensor() {
     // Enable the interrupt again now that we've finished sending output
     attachInterrupt(digitalPinToInterrupt(12), pulseCounter, FALLING);
   }
-  return reading;
+  if (flowRate > 0) {
+    return reading;
+  } else {
+    return "";
+  }
 }
 
 // Insterrupt Service Routine
