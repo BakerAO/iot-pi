@@ -6,9 +6,9 @@ command = ''
 
 def run():
   print 'Input Device ID'
-  deviceId = input()
+  deviceId = raw_input()
   print 'Input Command'
-  command = input()
+  command = raw_input()
   port.write(deviceId + '-' + command)
   deviceId = 0
 
