@@ -11,4 +11,7 @@ app.get('/:deviceId/:command', (req, res) => {
   }
 })
 
-app.listen(8082, () => console.log('Server Started'))
+app.listen(8082, () => {
+  spawn('python3', ['./python/iotReceive.py'])
+  console.log('Server Started')
+})
