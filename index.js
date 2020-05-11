@@ -1,6 +1,8 @@
-const { spawn } = require('child_process')
+const { exec, spawn } = require('child_process')
 const express = require('express')
 const app = express()
+
+exec('python3 ./python/iotReceive.py')
 
 app.get('/:deviceId/:command', (req, res) => {
   try {
@@ -12,6 +14,5 @@ app.get('/:deviceId/:command', (req, res) => {
 })
 
 app.listen(8082, () => {
-  spawn('python3', ['./python/iotReceive.py'])
   console.log('Server Started')
 })
