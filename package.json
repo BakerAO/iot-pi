@@ -1,0 +1,22 @@
+{
+  "name": "iot-pi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bakerao/iot-pi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bakerao/iot-pi/issues"
+  },
+  "homepage": "https://github.com/bakerao/iot-pi#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
