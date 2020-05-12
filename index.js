@@ -2,7 +2,7 @@ const { exec, spawn } = require('child_process')
 const express = require('express')
 const app = express()
 
-exec('python3 ./python/iotReceive.py')
+// exec('python3 ./python/iotReceive.py')
 
 app.get('/:deviceId/:command', (req, res) => {
   try {
