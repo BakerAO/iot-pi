@@ -15,4 +15,4 @@ def handleMessage(msg):
   send(msg)
 
 if __name__ == '__main__':
-  socket.run(app)
+  socket.run(app, port=8082)
