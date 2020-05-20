@@ -1,5 +1,6 @@
 #include <RH_RF95.h>
 
+#define VBATPIN A7
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
@@ -9,10 +10,19 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 unsigned long lastTrans;
 String deviceId = "20001";
 
+String readBattery() {
+  float vbat = analogRead(VBATPIN);
+  vbat *= 2;    // we divided by 2, so multiply back
+  vbat *= 3.3;  // Multiply by 3.3V, our reference voltage
+  vbat /= 1024; // convert to voltage
+  return String(vbat);
+}
+
 String readSensor() {
-  float value = 1.11;
+  float value = 1.23;
   String reading = "{ ";
-  reading += "\"device_id\": " + deviceId; 
+  reading += "\"device_id\": " + deviceId;
+  reading += ", \"battery\": " + readBattery();
   reading += ", \"value\": " + String(value);
   reading += " }";
   return reading;
