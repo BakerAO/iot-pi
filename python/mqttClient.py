@@ -10,13 +10,7 @@ def on_connect(client, userdata, flags, rc):
 
 # PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(1)
     print(msg.topic)
-    print(2)
-    print(msg.payload)
-    print(3)
-    print(str(msg.payload))
-    print(4)
     print(msg.payload.decode('UTF-8'))
 
 client = mqtt.Client()
