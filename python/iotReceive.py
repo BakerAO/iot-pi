@@ -3,7 +3,7 @@ import requests
 
 port = serial.Serial('/dev/ttyACM0', 115200)
 # url = "https://api.innov8.host/devices"
-url = "http://10.0.0.138:8081/devices"
+url = "http://10.0.0.142:8081/devices"
 
 while True:
   rcv = port.readline()
