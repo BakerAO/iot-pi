@@ -34,8 +34,7 @@ client.connect("broker.innov8.host", 1883, 60)
 while True:
   rcv = port.readline()
   if len(rcv) > 1:
-    rcvString = str(rcv)
-    url = url
+    rcvString = rcv.decode('UTF-8')
     headers = {'content-type': 'application/json'}
 
     try:
