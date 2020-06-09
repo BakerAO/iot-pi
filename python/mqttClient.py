@@ -2,9 +2,10 @@ import paho.mqtt.client as mqtt
 import serial
 import requests
 
+broker = 'broker.innov8.host'
 port = serial.Serial('/dev/ttyACM0', 115200)
-# url = 'https://api.innov8.host/devices'
-url = 'http://10.0.0.142:8081/devices'
+# api = 'https://api.innov8.host/devices'
+api = 'http://10.0.0.142:8081/devices'
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
@@ -17,20 +18,16 @@ def on_message(client, userdata, msg):
   print(msg.topic)
   print(payload)
   if payload == 'shut_off':
-    serialMsg = '10004-OFF'
+    serialMsg = '10004-SHUT_OFF'
+    port.write(serialMsg.encode())
+  if payload == 'open':
+    serialMsg = '10004-OPEN'
     port.write(serialMsg.encode())
 
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
-
-client.connect("broker.innov8.host", 1883, 60)
-
-# Blocking call that processes network traffic, dispatches callbacks and
-# handles reconnecting.
-# Other loop*() functions are available that give a threaded interface and a
-# manual interface.
-# client.loop_forever()
+client.connect(broker, 1883, 60)
 
 while True:
   rcv = port.readline()
@@ -40,8 +37,8 @@ while True:
       headers = {'content-type': 'application/json'}
 
       try:
+        response = requests.post(api, headers=headers, data=rcvString)
         print(rcvString)
-        response = requests.post(url, headers=headers, data=rcvString)
         print(response)
       except:
         print('Bad Connection')
