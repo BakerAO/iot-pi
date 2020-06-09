@@ -30,6 +30,7 @@ client.on_message = on_message
 client.connect(broker, 1883, 60)
 
 while True:
+  client.loop()
   rcv = port.readline()
   if len(rcv) > 1:
     rcvString = rcv.decode('UTF-8')
@@ -42,4 +43,3 @@ while True:
         print(response)
       except:
         print('Bad Connection')
-  client.loop()
