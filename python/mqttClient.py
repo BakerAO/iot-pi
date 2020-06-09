@@ -17,7 +17,8 @@ def on_message(client, userdata, msg):
   print(msg.topic)
   print(payload)
   if payload == 'shut_off':
-    port.write('10004-OFF')
+    serialMsg = '10004-OFF'
+    port.write(serialMsg.encode())
 
 client = mqtt.Client()
 client.on_connect = on_connect
