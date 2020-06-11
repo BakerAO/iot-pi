@@ -9,16 +9,18 @@
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 byte sensorPin = 6;
-int enablePin = 17; // A3
 int inputPin1 = 11;
 int inputPin2 = 12;
+int enablePin = 17; // A3
 int motorSpeed = 0; // 0 to 255
+String valveStatus = "open";
 volatile byte pulseCount;  
 float flowRate;
 unsigned int flowMilliLitres;
 unsigned long totalMilliLitres;
 unsigned long lastTrans;
-// The hall-effect flow sensor outputs approximately 4.5 pulses per second per litre/minute of flow
+// The hall-effect flow sensor outputs approximately 
+// 4.5 pulses per second per litre/minute of flow
 float calibrationFactor = 4.5;
 String deviceId = "10004";
 
@@ -49,9 +51,9 @@ void setup() {
   totalMilliLitres = 0;
   lastTrans = 0;
 
-  // Configured to trigger on a FALLING state change (transition from HIGH state to LOW state)
+  // Trigger on a FALLING state change (transition from HIGH state to LOW state)
   attachInterrupt(digitalPinToInterrupt(sensorPin), pulseCounter, FALLING);
-  Serial.begin(115200);
+  // Serial.begin(115200);
 }
 
 void loop() {
@@ -75,10 +77,9 @@ void receiveMessage() {
 }
 
 void processMessage(String message) {
-  Serial.println(message);
-  if (message.indexOf(deviceId + "-ON") == 0) {
+  if (message.indexOf(deviceId + "-SHUT_OFF") == 0) {
     activateMotor();
-  } else if (message.indexOf(deviceId + "-OFF") == 0) {
+  } else if (message.indexOf(deviceId + "-OPEN") == 0) {
     deactivateMotor();
   }
 }
@@ -88,6 +89,7 @@ void activateMotor() {
   digitalWrite(inputPin1, HIGH);
   digitalWrite(inputPin2, LOW);
   analogWrite(enablePin, motorSpeed);
+  valveStatus = "closed";
 }
 
 void reverseMotor() {
@@ -96,8 +98,11 @@ void reverseMotor() {
 }
 
 void deactivateMotor() {
+  motorSpeed = 0;
   digitalWrite(inputPin1, LOW);
   digitalWrite(inputPin2, LOW);
+  analogWrite(enablePin, motorSpeed);
+  valveStatus = "open";
 }
 
 String readSensor() {
@@ -126,14 +131,9 @@ String readSensor() {
 
     reading += "{ \"device_id\": " + deviceId;
     reading += ", \"battery\": " + readBattery();
-
-    // Litres per minute
-    reading += ", \"flow_rate\": " + String(flowRate);
-
-    // Litres
-    reading += ", \"total_output\": " + String(totalMilliLitres/1000);
-
-    reading += ", \"valve_status\": \"open\" }";
+    reading += ", \"flow_rate\": " + String(flowRate); // Litres per minute
+    reading += ", \"total_output\": " + String(totalMilliLitres/1000); // Litres
+    reading += ", \"valve_status\": \"" + valveStatus + "\" }";
 
     pulseCount = 0;
     // Enable the interrupt again now that we've finished sending output
@@ -156,13 +156,13 @@ void pulseCounter() {
 }
 
 void sendMessage(String message) {
-    int n = message.length() + 1;
-    char radiopacket[n];
-    strcpy(radiopacket, message.c_str());
-    delay(10);
-    rf95.send((uint8_t *)radiopacket, n);
-    delay(10);
-    rf95.waitPacketSent();
+  int n = message.length() + 1;
+  char radiopacket[n];
+  strcpy(radiopacket, message.c_str());
+  delay(10);
+  rf95.send((uint8_t *)radiopacket, n);
+  delay(10);
+  rf95.waitPacketSent();
 }
 
 String readBattery() {

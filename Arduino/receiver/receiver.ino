@@ -30,6 +30,7 @@ void setup() {
  
 void loop() {
   receiveLoRa();
+  delay(100);
   receiveSerial();
 }
 
@@ -42,13 +43,12 @@ void receiveLoRa() {
       sendSerialText(message);
     }
   }
-  delay(500);
 }
 
 void sendSerialText(String message) {
   Serial.println(message);
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
+  delay(100);
   digitalWrite(LED_BUILTIN, LOW);
 }
 
@@ -60,7 +60,7 @@ void receiveSerial() {
 }
 
 void sendLoRaMessage(String message) {
-  Serial.println(message);
+  Serial.println("LoRa from Pi: " + message);
   int n = message.length() + 1;
   char radiopacket[n];
   strcpy(radiopacket, message.c_str());
