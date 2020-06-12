@@ -14,12 +14,13 @@ int inputPin2 = 12;
 int enablePin = 17; // A3
 int motorSpeed = 0; // 0 to 255
 String valveStatus = "open";
-volatile byte pulseCount;  
+volatile byte pulseCount;
 float flowRate;
 unsigned int flowMilliLitres;
 unsigned long totalMilliLitres;
 unsigned long lastTrans;
-// The hall-effect flow sensor outputs approximately 
+unsigned long lastReading;
+// The hall-effect flow sensor outputs approximately
 // 4.5 pulses per second per litre/minute of flow
 float calibrationFactor = 4.5;
 String deviceId = "10004";
@@ -50,6 +51,7 @@ void setup() {
   flowMilliLitres = 0;
   totalMilliLitres = 0;
   lastTrans = 0;
+  lastReading = 0;
 
   // Trigger on a FALLING state change (transition from HIGH state to LOW state)
   attachInterrupt(digitalPinToInterrupt(sensorPin), pulseCounter, FALLING);
@@ -107,7 +109,7 @@ void deactivateMotor() {
 
 String readSensor() {
   String reading = "";
-  if ((millis() - lastTrans) > 1000) {
+  if ((millis() - lastReading) > 1000) {
     detachInterrupt(digitalPinToInterrupt(sensorPin));
         
     // Because this loop may not complete in exactly 1 second intervals we calculate
@@ -115,13 +117,13 @@ String readSensor() {
     // that to scale the output. We also apply the calibrationFactor to scale the output
     // based on the number of pulses per second per units of measure (litres/minute in
     // this case) coming from the sensor.
-    flowRate = ((1000.0 / (millis() - lastTrans)) * pulseCount) / calibrationFactor;
+    flowRate = ((1000.0 / (millis() - lastReading)) * pulseCount) / calibrationFactor;
     
     // Note the time this processing pass was executed. Note that because we've
     // disabled interrupts the millis() function won't actually be incrementing right
     // at this point, but it will still return the value it was set to just before
     // interrupts went away.
-    lastTrans = millis();
+    lastReading = millis();
     
     // Divide the flow rate in litres/minute by 60 to determine how many litres have
     // passed through the sensor in this 1 second interval, then multiply by 1000 to
@@ -138,12 +140,14 @@ String readSensor() {
     pulseCount = 0;
     // Enable the interrupt again now that we've finished sending output
     attachInterrupt(digitalPinToInterrupt(sensorPin), pulseCounter, FALLING);
+    lastTrans++;
   }
 
-  if (flowRate > 0) {
+  if (flowRate > 0 || lastTrans > 29 || (valveStatus == "closed" && lastTrans > 4)) {
     digitalWrite(LED_PIN, HIGH);
     delay(100);
     digitalWrite(LED_PIN, LOW);
+    lastTrans = 0;
     return reading;
   } else {
     return "";
