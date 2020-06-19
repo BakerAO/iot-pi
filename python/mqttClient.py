@@ -33,13 +33,12 @@ while True:
   client.loop()
   rcv = port.readline()
   if len(rcv) > 1:
-    rcvString = rcv.decode('UTF-8')
-    if rcvString.find('{') == 0:
-      headers = {'content-type': 'application/json'}
-
-      try:
-        response = requests.post(api, headers=headers, data=rcvString)
-        print(rcvString)
-        print(response)
-      except:
-        print('Bad Connection')
+    try:
+      rcvString = rcv.decode('UTF-8')
+      if rcvString.find('{') == 0:
+        headers = {'content-type': 'application/json'}
+          response = requests.post(api, headers=headers, data=rcvString)
+          print(rcvString)
+          print(response)
+    except:
+      print('Error')
