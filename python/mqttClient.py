@@ -37,8 +37,8 @@ while True:
       rcvString = rcv.decode('UTF-8')
       if rcvString.find('{') == 0:
         headers = {'content-type': 'application/json'}
-          response = requests.post(api, headers=headers, data=rcvString)
-          print(rcvString)
-          print(response)
+        response = requests.post(api, headers=headers, data=rcvString)
+        print(rcvString)
+        print(response)
     except:
       print('Error')
