@@ -59,12 +59,16 @@ void setup() {
 }
 
 void loop() {
-  String reading = readSensor();
+  readAndSend(false);
+  receiveMessage();
+  delay(1000);
+}
+
+void readAndSend(bool forceSend) {
+  String reading = readSensor(forceSend);
   if (reading.length() > 0) {
     sendMessage(reading);
   }
-  receiveMessage();
-  delay(1000);
 }
 
 void receiveMessage() {
@@ -81,22 +85,19 @@ void receiveMessage() {
 void processMessage(String message) {
   if (message.indexOf(deviceId + "-SHUT_OFF") == 0) {
     activateMotor();
+    readAndSend(true);
   } else if (message.indexOf(deviceId + "-OPEN") == 0) {
     deactivateMotor();
+    readAndSend(true);
   }
 }
 
 void activateMotor() {
   motorSpeed = 200;
-  digitalWrite(inputPin1, HIGH);
-  digitalWrite(inputPin2, LOW);
-  analogWrite(enablePin, motorSpeed);
-  valveStatus = "closed";
-}
-
-void reverseMotor() {
   digitalWrite(inputPin1, LOW);
   digitalWrite(inputPin2, HIGH);
+  analogWrite(enablePin, motorSpeed);
+  valveStatus = "closed";
 }
 
 void deactivateMotor() {
@@ -107,9 +108,9 @@ void deactivateMotor() {
   valveStatus = "open";
 }
 
-String readSensor() {
+String readSensor(bool forceSend) {
   String reading = "";
-  if ((millis() - lastReading) > 1000) {
+  if ((millis() - lastReading) > 1000 || forceSend) {
     detachInterrupt(digitalPinToInterrupt(sensorPin));
         
     // Because this loop may not complete in exactly 1 second intervals we calculate
@@ -143,7 +144,7 @@ String readSensor() {
     lastTrans++;
   }
 
-  if (flowRate > 0 || lastTrans > 29 || (valveStatus == "closed" && lastTrans > 4)) {
+  if (forceSend || flowRate > 0 || lastTrans > 29 || (valveStatus == "closed" && lastTrans > 4)) {
     digitalWrite(LED_PIN, HIGH);
     delay(100);
     digitalWrite(LED_PIN, LOW);
