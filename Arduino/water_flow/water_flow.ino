@@ -1,33 +1,28 @@
 #include <RH_RF95.h>
 
-#define VBATPIN A7
-#define LED_PIN 13
+#define VBAT_PIN A7 // 12
+#define INPUT_PIN 6
+#define ENABLE_PIN A3 // 17
+#define SENSOR_PIN 11
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
 #define RF95_FREQ 915.0
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-byte sensorPin = 6;
-int inputPin1 = 11;
-int inputPin2 = 12;
-int enablePin = 17; // A3
-int motorSpeed = 0; // 0 to 255
+String deviceId = "10004";
 String valveStatus = "open";
-volatile byte pulseCount;
-float flowRate;
-unsigned int flowMilliLitres;
-unsigned long totalMilliLitres;
-unsigned long lastTrans;
-unsigned long lastReading;
+volatile byte pulseCount = 0;
+float flowRate = 0;
+unsigned int flowMilliLitres = 0;
+unsigned long totalMilliLitres = 0;
+unsigned long lastTrans = 0;
+unsigned long lastReading = 0;
 // The hall-effect flow sensor outputs approximately
 // 4.5 pulses per second per litre/minute of flow
 float calibrationFactor = 4.5;
-String deviceId = "10004";
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   delay(100);
@@ -40,22 +35,12 @@ void setup() {
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
 
-  pinMode(enablePin, OUTPUT);
-  pinMode(inputPin1, OUTPUT);
-  pinMode(inputPin2, OUTPUT);
-  pinMode(sensorPin, INPUT);
-  digitalWrite(sensorPin, HIGH);
-
-  pulseCount = 0;
-  flowRate = 0.0;
-  flowMilliLitres = 0;
-  totalMilliLitres = 0;
-  lastTrans = 0;
-  lastReading = 0;
-
-  // Trigger on a FALLING state change (transition from HIGH state to LOW state)
-  attachInterrupt(digitalPinToInterrupt(sensorPin), pulseCounter, FALLING);
-  // Serial.begin(115200);
+  pinMode(INPUT_PIN, OUTPUT);
+  pinMode(ENABLE_PIN, OUTPUT);
+  pinMode(SENSOR_PIN, INPUT);
+  digitalWrite(SENSOR_PIN, HIGH);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
+//  Serial.begin(115200);
 }
 
 void loop() {
@@ -71,47 +56,10 @@ void readAndSend(bool forceSend) {
   }
 }
 
-void receiveMessage() {
-  if (rf95.available()) {
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-    uint8_t len = sizeof(buf);
-    if (rf95.recv(buf, &len)) {
-      String message = (char*)buf;
-      processMessage(message);
-    }
-  }
-}
-
-void processMessage(String message) {
-  if (message.indexOf(deviceId + "-SHUT_OFF") == 0) {
-    activateMotor();
-    readAndSend(true);
-  } else if (message.indexOf(deviceId + "-OPEN") == 0) {
-    deactivateMotor();
-    readAndSend(true);
-  }
-}
-
-void activateMotor() {
-  motorSpeed = 200;
-  digitalWrite(inputPin1, LOW);
-  digitalWrite(inputPin2, HIGH);
-  analogWrite(enablePin, motorSpeed);
-  valveStatus = "closed";
-}
-
-void deactivateMotor() {
-  motorSpeed = 0;
-  digitalWrite(inputPin1, LOW);
-  digitalWrite(inputPin2, LOW);
-  analogWrite(enablePin, motorSpeed);
-  valveStatus = "open";
-}
-
 String readSensor(bool forceSend) {
   String reading = "";
   if ((millis() - lastReading) > 1000 || forceSend) {
-    detachInterrupt(digitalPinToInterrupt(sensorPin));
+    detachInterrupt(digitalPinToInterrupt(SENSOR_PIN));
         
     // Because this loop may not complete in exactly 1 second intervals we calculate
     // the number of milliseconds that have passed since the last execution and use
@@ -140,14 +88,11 @@ String readSensor(bool forceSend) {
 
     pulseCount = 0;
     // Enable the interrupt again now that we've finished sending output
-    attachInterrupt(digitalPinToInterrupt(sensorPin), pulseCounter, FALLING);
+    attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
     lastTrans++;
   }
 
   if (forceSend || flowRate > 0 || lastTrans > 29 || (valveStatus == "closed" && lastTrans > 4)) {
-    digitalWrite(LED_PIN, HIGH);
-    delay(100);
-    digitalWrite(LED_PIN, LOW);
     lastTrans = 0;
     return reading;
   } else {
@@ -170,8 +115,40 @@ void sendMessage(String message) {
   rf95.waitPacketSent();
 }
 
+void receiveMessage() {
+  if (rf95.available()) {
+    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+    uint8_t len = sizeof(buf);
+    if (rf95.recv(buf, &len)) {
+      String message = (char*)buf;
+      processMessage(message);
+    }
+  }
+}
+
+void processMessage(String message) {
+  if (message.indexOf(deviceId + "-SHUT_OFF") == 0) {
+    activateMotor();
+  } else if (message.indexOf(deviceId + "-OPEN") == 0) {
+    deactivateMotor();
+  }
+}
+
+void activateMotor() {
+  analogWrite(ENABLE_PIN, 100);
+  digitalWrite(INPUT_PIN, HIGH);
+  valveStatus = "closed";
+}
+
+void deactivateMotor() {
+  analogWrite(ENABLE_PIN, 0);
+  digitalWrite(INPUT_PIN, LOW);
+  valveStatus = "open";
+  readAndSend(true);
+}
+
 String readBattery() {
-  float vbat = analogRead(VBATPIN);
+  float vbat = analogRead(VBAT_PIN);
   vbat *= 2;    // we divided by 2, so multiply back
   vbat *= 3.3;  // Multiply by 3.3V, our reference voltage
   vbat /= 1024; // convert to voltage
