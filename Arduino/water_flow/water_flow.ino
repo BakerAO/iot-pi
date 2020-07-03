@@ -135,7 +135,7 @@ void processMessage(String message) {
 }
 
 void activateMotor() {
-  analogWrite(ENABLE_PIN, 100);
+  analogWrite(ENABLE_PIN, 255);
   digitalWrite(INPUT_PIN, HIGH);
   valveStatus = "closed";
 }
