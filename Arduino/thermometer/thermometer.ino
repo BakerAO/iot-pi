@@ -7,11 +7,12 @@
 #define RFM95_INT 3
 #define RF95_FREQ 915.0
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
-#define DHT_PIN 12
+#define DHT_PIN 16 // A2
 #define DHT_TYPE DHT11
 DHT dht(DHT_PIN, DHT_TYPE);
+
+String deviceId = "20001";
 unsigned long lastTrans;
-String deviceId = "10001";
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
