@@ -9,11 +9,11 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
-  delay(10);
+  delay(100);
   digitalWrite(RFM95_RST, LOW);
-  delay(10);
+  delay(100);
   digitalWrite(RFM95_RST, HIGH);
-  delay(10);
+  delay(100);
 
   rf95.init();
   rf95.setFrequency(RF95_FREQ);
@@ -22,25 +22,8 @@ void setup() {
 }
  
 void loop() {
-  receiveLoRa();
-  delay(10);
   receiveSerial();
   delay(10);
-}
-
-void receiveLoRa() {
-  if (rf95.available()) {
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-    uint8_t len = sizeof(buf);
-    if (rf95.recv(buf, &len)) {
-      String message = (char*)buf;
-      sendSerialTextToPi(message);
-    }
-  }
-}
-
-void sendSerialTextToPi(String message) {
-  Serial.println(message);
 }
 
 void receiveSerial() {
