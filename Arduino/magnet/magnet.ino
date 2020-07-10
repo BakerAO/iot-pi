@@ -1,6 +1,6 @@
 #include <RH_RF95.h>
 
-#define INPUT_PIN 12
+#define INPUT_PIN 15 // A1
 #define VBAT_PIN A7 // 12
 #define RFM95_CS 8
 #define RFM95_RST 4
@@ -8,7 +8,7 @@
 #define RF95_FREQ 915.0
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-String deviceId = "10003";
+String deviceId = "20001";
 unsigned long lastReading = 0;
 unsigned long lastTrans = 0;
 boolean magnetStatus = 0;
@@ -16,7 +16,7 @@ boolean magnetStatus = 0;
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
-  delay(100);
+  delay(10);
   digitalWrite(RFM95_RST, LOW);
   delay(10);
   digitalWrite(RFM95_RST, HIGH);
@@ -26,7 +26,7 @@ void setup() {
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
 
-  pinMode(INPUT_PIN, INPUT);
+  pinMode(INPUT_PIN, INPUT_PULLUP);
 //  Serial.begin(115200);
 }
 
