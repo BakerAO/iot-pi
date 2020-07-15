@@ -78,6 +78,9 @@ String readSensor(bool forceSend) {
     // passed through the sensor in this 1 second interval, then multiply by 1000 to
     // convert to millilitres.
     flowMilliLitres = (flowRate / 60) * 1000;
+    if (totalMilliLitres > 100000) {
+      totalMilliLitres = 0;
+    }
     totalMilliLitres += flowMilliLitres;
 
     reading += "{ \"device_id\": " + deviceId;

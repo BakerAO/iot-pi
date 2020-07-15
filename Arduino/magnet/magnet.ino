@@ -8,7 +8,7 @@
 #define RF95_FREQ 915.0
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-String deviceId = "20001";
+String deviceId = "10006";
 unsigned long lastReading = 0;
 unsigned long lastTrans = 0;
 boolean magnetStatus = 0;
