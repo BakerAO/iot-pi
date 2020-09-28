@@ -10,7 +10,7 @@
 #define RF95_FREQ 915.0
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-String deviceId = "10004";
+String deviceId = "10005";
 String valveStatus = "open";
 volatile byte pulseCount = 0;
 float flowRate = 0;
@@ -138,13 +138,15 @@ void processMessage(String message) {
 }
 
 void activateMotor() {
-  analogWrite(ENABLE_PIN, 255);
+//  analogWrite(ENABLE_PIN, 255);
+  digitalWrite(ENABLE_PIN, HIGH);
   digitalWrite(INPUT_PIN, HIGH);
   valveStatus = "closed";
 }
 
 void deactivateMotor() {
-  analogWrite(ENABLE_PIN, 0);
+//  analogWrite(ENABLE_PIN, 0);
+  digitalWrite(ENABLE_PIN, LOW);
   digitalWrite(INPUT_PIN, LOW);
   valveStatus = "open";
   readAndSend(true);
