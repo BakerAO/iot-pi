@@ -20,12 +20,10 @@ void setup() {
   rf95.setTxPower(23, false);
   Serial.begin(115200);
 }
- 
+
 void loop() {
   receiveLoRa();
-  delay(10);
   receiveSerial();
-  delay(10);
 }
 
 void receiveLoRa() {
@@ -54,8 +52,7 @@ void sendLoRaMessage(String message) {
   int n = message.length() + 1;
   char radiopacket[n];
   strcpy(radiopacket, message.c_str());
-  delay(10);
   rf95.send((uint8_t *)radiopacket, n);
-  delay(10);
+  delay(5);
   rf95.waitPacketSent();
 }
