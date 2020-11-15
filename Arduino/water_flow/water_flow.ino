@@ -1,9 +1,9 @@
 #include <RH_RF95.h>
 
 #define VBAT_PIN A7 // 12
-#define INPUT_PIN 6
+#define INPUT_PIN A4 // 16
 #define ENABLE_PIN A3 // 17
-#define SENSOR_PIN 11
+#define SENSOR_PIN 15 // A1
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
@@ -53,6 +53,7 @@ void readAndSend(bool forceSend) {
   String reading = readSensor(forceSend);
   if (reading.length() > 0) {
     sendMessage(reading);
+//    Serial.println(reading);
   }
 }
 
@@ -95,7 +96,7 @@ String readSensor(bool forceSend) {
     lastTrans++;
   }
 
-  if (forceSend || flowRate > 0 || lastTrans > 29 || (valveStatus == "closed" && lastTrans > 4)) {
+  if (forceSend || flowRate > 0 || lastTrans > 9 || (valveStatus == "closed" && lastTrans > 4)) {
     lastTrans = 0;
     return reading;
   } else {
