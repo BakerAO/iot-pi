@@ -3,13 +3,13 @@
 #define VBAT_PIN A7 // 12
 #define INPUT_PIN A4 // 16
 #define ENABLE_PIN A3 // 17
-#define SENSOR_PIN 15 // A1
+#define SENSOR_PIN A1 // 15
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
 #define RF95_FREQ 915.0
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
 String deviceId = "10005";
 String valveStatus = "open";
 volatile byte pulseCount = 0;
