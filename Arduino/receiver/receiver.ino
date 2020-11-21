@@ -9,28 +9,20 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
-  delay(100);
+  delay(10);
   digitalWrite(RFM95_RST, LOW);
-  delay(100);
+  delay(10);
   digitalWrite(RFM95_RST, HIGH);
-  delay(100);
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
+  delay(10);
 
   rf95.init();
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
-
   Serial.begin(115200);
 }
- 
+
 void loop() {
   receiveLoRa();
-  delay(100);
   receiveSerial();
 }
 
@@ -40,16 +32,13 @@ void receiveLoRa() {
     uint8_t len = sizeof(buf);
     if (rf95.recv(buf, &len)) {
       String message = (char*)buf;
-      sendSerialText(message);
+      sendSerialTextToPi(message);
     }
   }
 }
 
-void sendSerialText(String message) {
+void sendSerialTextToPi(String message) {
   Serial.println(message);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void receiveSerial() {
@@ -60,12 +49,10 @@ void receiveSerial() {
 }
 
 void sendLoRaMessage(String message) {
-  Serial.println("LoRa from Pi: " + message);
   int n = message.length() + 1;
   char radiopacket[n];
   strcpy(radiopacket, message.c_str());
-  delay(10);
   rf95.send((uint8_t *)radiopacket, n);
-  delay(10);
+  delay(5);
   rf95.waitPacketSent();
 }

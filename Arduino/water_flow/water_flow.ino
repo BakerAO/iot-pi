@@ -1,16 +1,16 @@
 #include <RH_RF95.h>
 
 #define VBAT_PIN A7 // 12
-#define INPUT_PIN 6
+#define INPUT_PIN A4 // 16
 #define ENABLE_PIN A3 // 17
-#define SENSOR_PIN 11
+#define SENSOR_PIN A1 // 15
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
 #define RF95_FREQ 915.0
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-String deviceId = "10004";
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
+String deviceId = "10005";
 String valveStatus = "open";
 volatile byte pulseCount = 0;
 float flowRate = 0;
@@ -53,6 +53,7 @@ void readAndSend(bool forceSend) {
   String reading = readSensor(forceSend);
   if (reading.length() > 0) {
     sendMessage(reading);
+//    Serial.println(reading);
   }
 }
 
@@ -78,6 +79,9 @@ String readSensor(bool forceSend) {
     // passed through the sensor in this 1 second interval, then multiply by 1000 to
     // convert to millilitres.
     flowMilliLitres = (flowRate / 60) * 1000;
+    if (totalMilliLitres > 100000) {
+      totalMilliLitres = 0;
+    }
     totalMilliLitres += flowMilliLitres;
 
     reading += "{ \"device_id\": " + deviceId;
@@ -92,7 +96,7 @@ String readSensor(bool forceSend) {
     lastTrans++;
   }
 
-  if (forceSend || flowRate > 0 || lastTrans > 29 || (valveStatus == "closed" && lastTrans > 4)) {
+  if (forceSend || flowRate > 0 || lastTrans > 9 || (valveStatus == "closed" && lastTrans > 4)) {
     lastTrans = 0;
     return reading;
   } else {
@@ -135,13 +139,15 @@ void processMessage(String message) {
 }
 
 void activateMotor() {
-  analogWrite(ENABLE_PIN, 255);
+//  analogWrite(ENABLE_PIN, 255);
+  digitalWrite(ENABLE_PIN, HIGH);
   digitalWrite(INPUT_PIN, HIGH);
   valveStatus = "closed";
 }
 
 void deactivateMotor() {
-  analogWrite(ENABLE_PIN, 0);
+//  analogWrite(ENABLE_PIN, 0);
+  digitalWrite(ENABLE_PIN, LOW);
   digitalWrite(INPUT_PIN, LOW);
   valveStatus = "open";
   readAndSend(true);
