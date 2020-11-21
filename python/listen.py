@@ -26,7 +26,6 @@ client.connect(broker, 1883, 60)
 client.loop_start()
 
 while True:
-  # client.loop()
   rcv = port.readline()
   if len(rcv) > 1:
     try:
