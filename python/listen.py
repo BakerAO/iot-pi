@@ -1,11 +1,18 @@
 import paho.mqtt.client as mqtt
 import serial
 import requests
+import argparse
 
+argParser = argparse.ArgumentParser()
+argParser.add_argument('-dev', dest='develop', action='store_true')
+argParser.set_defaults(develop=False)
+args = argParser.parse_args()
 broker = 'broker.innov8.host'
 port = serial.Serial('/dev/ttyACM0', 115200)
 api = 'https://api.innov8.host/devices'
-# api = 'http://10.0.0.142:8081/devices'
+print(args)
+if args.dev
+  api = 'http://10.0.0.142:8081/devices'
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
