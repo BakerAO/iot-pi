@@ -1,4 +1,5 @@
 #include <RH_RF95.h>
+#include <TinyGPS++.h>
 
 #define VBAT_PIN A7 // 12
 #define INPUT_PIN A4 // 16
@@ -10,7 +11,8 @@
 #define RF95_FREQ 915.0
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
-String deviceId = "10005";
+TinyGPSPlus gps;
+String deviceId = "10004";
 String valveStatus = "open";
 volatile byte pulseCount = 0;
 float flowRate = 0;
@@ -21,6 +23,9 @@ unsigned long lastReading = 0;
 // The hall-effect flow sensor outputs approximately
 // 4.5 pulses per second per litre/minute of flow
 float calibrationFactor = 4.5;
+float lat, lng, alt, tempHDOP;
+uint8_t sats;
+uint32_t hdop;
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -40,7 +45,9 @@ void setup() {
   pinMode(SENSOR_PIN, INPUT);
   digitalWrite(SENSOR_PIN, HIGH);
   attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
+  Serial1.begin(9600);
 //  Serial.begin(115200);
+  waitForGPSFix();
 }
 
 void loop() {
@@ -59,22 +66,24 @@ void readAndSend(bool forceSend) {
 
 String readSensor(bool forceSend) {
   String reading = "";
-  if ((millis() - lastReading) > 1000 || forceSend) {
+  if ((millis() - lastReading) > 10000 || forceSend) {
+    // if (!forceSend) waitForGPSFix();
+
     detachInterrupt(digitalPinToInterrupt(SENSOR_PIN));
-        
+
     // Because this loop may not complete in exactly 1 second intervals we calculate
     // the number of milliseconds that have passed since the last execution and use
     // that to scale the output. We also apply the calibrationFactor to scale the output
     // based on the number of pulses per second per units of measure (litres/minute in
     // this case) coming from the sensor.
     flowRate = ((1000.0 / (millis() - lastReading)) * pulseCount) / calibrationFactor;
-    
+
     // Note the time this processing pass was executed. Note that because we've
     // disabled interrupts the millis() function won't actually be incrementing right
     // at this point, but it will still return the value it was set to just before
     // interrupts went away.
     lastReading = millis();
-    
+
     // Divide the flow rate in litres/minute by 60 to determine how many litres have
     // passed through the sensor in this 1 second interval, then multiply by 1000 to
     // convert to millilitres.
@@ -88,7 +97,13 @@ String readSensor(bool forceSend) {
     reading += ", \"battery\": " + readBattery();
     reading += ", \"flow_rate\": " + String(flowRate); // Litres per minute
     reading += ", \"total_output\": " + String(totalMilliLitres/1000); // Litres
-    reading += ", \"valve_status\": \"" + valveStatus + "\" }";
+    reading += ", \"valve_status\": \"" + valveStatus + "\"";
+    reading += ", \"latitude\": " + String(lat, 8);
+    reading += ", \"longitude\": " + String(lng, 8);
+    reading += ", \"altitude\": " + String(alt, 1);
+    reading += ", \"satellites\": " + String(sats);
+    reading += ", \"hdop\": " + String(tempHDOP, 2);
+    reading += " }";
 
     pulseCount = 0;
     // Enable the interrupt again now that we've finished sending output
@@ -101,6 +116,26 @@ String readSensor(bool forceSend) {
     return reading;
   } else {
     return "";
+  }
+}
+
+void waitForGPSFix() {
+  uint8_t GPSchar;
+  while (1) {
+    if (Serial1.available() > 0) {
+      GPSchar = Serial1.read();
+      gps.encode(GPSchar);
+    }
+
+    if (gps.location.isUpdated() && gps.altitude.isUpdated()) {
+      lat = gps.location.lat();
+      lng = gps.location.lng();
+      alt = gps.altitude.meters();
+      sats = gps.satellites.value();
+      hdop = gps.hdop.value();
+      tempHDOP = ((float) hdop / 100);
+      break;
+    }
   }
 }
 

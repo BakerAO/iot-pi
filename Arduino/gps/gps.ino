@@ -13,9 +13,9 @@
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 String deviceId = "10007";
 TinyGPSPlus gps;
-float lat, lon, alt;
+float lat, lng, alt;
 uint8_t sats;
-uint32_t hdop, startTime, sendTime;
+uint32_t hdop, startTime, sendTime, lastTrans;
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -35,10 +35,13 @@ void setup() {
 }
 
 void loop() {
-  gpsWaitFix();
-  readAndSend();
+  if (lastTrans + 30000 < millis()) {
+    gpsWaitFix();
+    readAndSend();
+    lastTrans = millis();
+  }
+  delay(1000);
 }
-
 
 void gpsWaitFix() {
   uint8_t GPSchar;
@@ -56,13 +59,12 @@ void gpsWaitFix() {
   }
 }
 
-
 void readAndSend() {
   String reading = "";
   float tempHDOP;
   int timeLength = sendTime - startTime;
   lat = gps.location.lat();
-  lon = gps.location.lng();
+  lng = gps.location.lng();
   alt = gps.altitude.meters();
   sats = gps.satellites.value();
   hdop = gps.hdop.value();
@@ -71,10 +73,10 @@ void readAndSend() {
   reading += "{ \"device_id\": " + deviceId;
   reading += ", \"battery\": " + readBattery();
   reading += ", \"latitude\": " + String(lat, 8);
-  reading += ", \"longitude\": " + String(lon, 8);
+  reading += ", \"longitude\": " + String(lng, 8);
+  reading += ", \"altitude\": " + String(alt, 1);
   reading += ", \"satellites\": " + String(sats);
-  reading += ", \"hdop\": " + String(tempHDOP, 2);
-  reading += ", \"altitude\": \"" + String(alt, 1) + "\" }";
+  reading += ", \"hdop\": " + String(tempHDOP, 2) + " }";
 
 //  Serial.println(reading);
   sendMessage(reading);
