@@ -1,10 +1,10 @@
 #include <RH_RF95.h>
 #include <TinyGPS++.h>
 
-#define VBAT_PIN A7 // 12
-#define INPUT_PIN A4 // 16
-#define ENABLE_PIN A3 // 17
-#define SENSOR_PIN A1 // 15
+#define VBAT_PIN A7 // 9
+#define SENSOR_PIN A4 // 18
+#define ENABLE_PIN A5 // 19
+
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
@@ -40,7 +40,6 @@ void setup() {
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
 
-  pinMode(INPUT_PIN, OUTPUT);
   pinMode(ENABLE_PIN, OUTPUT);
   pinMode(SENSOR_PIN, INPUT);
   digitalWrite(SENSOR_PIN, HIGH);
@@ -174,16 +173,12 @@ void processMessage(String message) {
 }
 
 void activateMotor() {
-//  analogWrite(ENABLE_PIN, 255);
   digitalWrite(ENABLE_PIN, HIGH);
-  digitalWrite(INPUT_PIN, HIGH);
   valveStatus = "closed";
 }
 
 void deactivateMotor() {
-//  analogWrite(ENABLE_PIN, 0);
   digitalWrite(ENABLE_PIN, LOW);
-  digitalWrite(INPUT_PIN, LOW);
   valveStatus = "open";
   readAndSend(true);
 }
