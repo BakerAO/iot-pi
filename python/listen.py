@@ -10,7 +10,8 @@ broker = 'broker.innov8.host'
 port = serial.Serial('/dev/ttyACM0', 115200)
 api = 'https://api.innov8.host/devices'
 if args.dev:
-  api = 'http://10.0.0.142:8081/devices'
+  api = 'http://10.0.0.5:8081/devices'
+  broker = '10.0.0.5'
 print(api)
 
 # CONNACK received from the server.

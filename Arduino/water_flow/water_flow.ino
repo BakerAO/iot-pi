@@ -1,9 +1,12 @@
 #include <RH_RF95.h>
 #include <TinyGPS++.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 #define VBAT_PIN A7 // 9
 #define SENSOR_PIN A4 // 18
 #define ENABLE_PIN A5 // 19
+#define TEMPERATURE_PIN A4
 
 #define RFM95_CS 8
 #define RFM95_RST 4
@@ -12,6 +15,9 @@
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 TinyGPSPlus gps;
+OneWire oneWire(TEMPERATURE_PIN);
+DallasTemperature temperatureSensor(&oneWire);
+
 String deviceId = "10004";
 String valveStatus = "open";
 volatile byte pulseCount = 0;
