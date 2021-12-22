@@ -13,6 +13,7 @@ if args.dev:
   api = 'http://10.0.0.5:8081/devices'
   broker = '10.0.0.5'
 print(api)
+print(broker)
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
