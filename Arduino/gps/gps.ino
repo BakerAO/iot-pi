@@ -2,20 +2,16 @@
 #include <RH_RF95.h>
 
 #define VBAT_PIN A7 // 12
-#define INPUT_PIN A4 // 16
-#define ENABLE_PIN A3 // 17
-#define SENSOR_PIN A1 // 15
 #define RFM95_CS 8
 #define RFM95_RST 4
 #define RFM95_INT 3
 #define RF95_FREQ 915.0
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
-String deviceId = "10007";
+String deviceId = "10003";
 TinyGPSPlus gps;
-float lat, lng, alt;
-uint8_t sats;
-uint32_t hdop, startTime, sendTime, lastTrans;
+float lat, lng, alt, tempHDOP;
+uint32_t hdop, sats, startTime, sendTime, lastTrans;
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -30,6 +26,7 @@ void setup() {
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
 
+  lastTrans = 0;
   Serial1.begin(9600);
 //  Serial.begin(115200);
 }
@@ -52,8 +49,14 @@ void gpsWaitFix() {
       gps.encode(GPSchar);
     }
 
-    if (gps.location.isUpdated() && gps.altitude.isUpdated()) {
-      sendTime = millis();
+//    if (gps.location.isUpdated() && gps.altitude.isUpdated()) {
+    if (gps.time.isUpdated()) {
+      lat = gps.location.lat();
+      lng = gps.location.lng();
+      alt = gps.altitude.meters();
+      sats = gps.satellites.value();
+      hdop = gps.hdop.value();
+      tempHDOP = ((float) hdop / 100);
       break;
     }
   }
@@ -61,20 +64,13 @@ void gpsWaitFix() {
 
 void readAndSend() {
   String reading = "";
-  float tempHDOP;
   int timeLength = sendTime - startTime;
-  lat = gps.location.lat();
-  lng = gps.location.lng();
-  alt = gps.altitude.meters();
-  sats = gps.satellites.value();
-  hdop = gps.hdop.value();
-  tempHDOP = ((float) hdop / 100);
 
   reading += "{ \"device_id\": " + deviceId;
   reading += ", \"battery\": " + readBattery();
   reading += ", \"latitude\": " + String(lat, 8);
   reading += ", \"longitude\": " + String(lng, 8);
-  reading += ", \"altitude\": " + String(alt, 1);
+  reading += ", \"altitude\": " + String(alt, 2);
   reading += ", \"satellites\": " + String(sats);
   reading += ", \"hdop\": " + String(tempHDOP, 2) + " }";
 
