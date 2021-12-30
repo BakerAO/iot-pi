@@ -50,7 +50,7 @@ void gpsWaitFix() {
     }
 
 //    if (gps.location.isUpdated() && gps.altitude.isUpdated()) {
-    if (gps.time.isUpdated()) {
+    if (gps.hdop.isUpdated()) {
       lat = gps.location.lat();
       lng = gps.location.lng();
       alt = gps.altitude.meters();
