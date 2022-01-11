@@ -4,9 +4,9 @@
 #include <DallasTemperature.h>
 
 #define VBAT_PIN A7 // 9
+#define ENABLE_PIN A3 // 17
 #define SENSOR_PIN A4 // 18
-#define ENABLE_PIN A5 // 19
-#define TEMPERATURE_PIN A4
+#define TEMPERATURE_PIN A5 // 19
 
 #define RFM95_CS 8
 #define RFM95_RST 4
@@ -18,20 +18,15 @@ TinyGPSPlus gps;
 OneWire oneWire(TEMPERATURE_PIN);
 DallasTemperature temperatureSensor(&oneWire);
 
-String deviceId = "10004";
+String deviceId = "10005";
 String valveStatus = "open";
 volatile byte pulseCount = 0;
-float flowRate = 0;
 unsigned int flowMilliLitres = 0;
-unsigned long totalMilliLitres = 0;
-unsigned long lastTrans = 0;
-unsigned long lastReading = 0;
+unsigned long totalMilliLitres = 0, lastTrans = 0, lastReading = 0;
 // The hall-effect flow sensor outputs approximately
 // 4.5 pulses per second per litre/minute of flow
-float calibrationFactor = 4.5;
-float lat, lng, alt, tempHDOP;
-uint8_t sats;
-uint32_t hdop;
+float flowRate = 0, calibrationFactor = 4.5, lat, lng, alt, tempHDOP;
+uint32_t hdop, sats;
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -50,56 +45,38 @@ void setup() {
   pinMode(SENSOR_PIN, INPUT);
   digitalWrite(SENSOR_PIN, HIGH);
   attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
+  temperatureSensor.begin();
   Serial1.begin(9600);
 //  Serial.begin(115200);
-  waitForGPSFix();
+  delay(2000);
+//  Serial.println("Start");
+  readGPS();
 }
 
 void loop() {
-  readAndSend(false);
-  receiveMessage();
+//  Serial.println("Loop");
+  readAndSend();
+//  receiveMessage();
   delay(1000);
 }
 
-void readAndSend(bool forceSend) {
-  String reading = readSensor(forceSend);
+void readAndSend() {
+  String reading = readSensors();
   if (reading.length() > 0) {
     sendMessage(reading);
 //    Serial.println(reading);
   }
 }
 
-String readSensor(bool forceSend) {
+String readSensors() {
   String reading = "";
-  if ((millis() - lastReading) > 10000 || forceSend) {
-    // if (!forceSend) waitForGPSFix();
-
-    detachInterrupt(digitalPinToInterrupt(SENSOR_PIN));
-
-    // Because this loop may not complete in exactly 1 second intervals we calculate
-    // the number of milliseconds that have passed since the last execution and use
-    // that to scale the output. We also apply the calibrationFactor to scale the output
-    // based on the number of pulses per second per units of measure (litres/minute in
-    // this case) coming from the sensor.
-    flowRate = ((1000.0 / (millis() - lastReading)) * pulseCount) / calibrationFactor;
-
-    // Note the time this processing pass was executed. Note that because we've
-    // disabled interrupts the millis() function won't actually be incrementing right
-    // at this point, but it will still return the value it was set to just before
-    // interrupts went away.
-    lastReading = millis();
-
-    // Divide the flow rate in litres/minute by 60 to determine how many litres have
-    // passed through the sensor in this 1 second interval, then multiply by 1000 to
-    // convert to millilitres.
-    flowMilliLitres = (flowRate / 60) * 1000;
-    if (totalMilliLitres > 100000) {
-      totalMilliLitres = 0;
-    }
-    totalMilliLitres += flowMilliLitres;
+  if ((millis() - lastReading) > 10000) {
+    readFlow();
+    readGPS();
 
     reading += "{ \"device_id\": " + deviceId;
     reading += ", \"battery\": " + readBattery();
+    reading += ", \"temperature\": " + readTemperature();
     reading += ", \"flow_rate\": " + String(flowRate); // Litres per minute
     reading += ", \"total_output\": " + String(totalMilliLitres/1000); // Litres
     reading += ", \"valve_status\": \"" + valveStatus + "\"";
@@ -110,13 +87,10 @@ String readSensor(bool forceSend) {
     reading += ", \"hdop\": " + String(tempHDOP, 2);
     reading += " }";
 
-    pulseCount = 0;
-    // Enable the interrupt again now that we've finished sending output
-    attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
     lastTrans++;
   }
 
-  if (forceSend || flowRate > 0 || lastTrans > 9 || (valveStatus == "closed" && lastTrans > 4)) {
+  if (flowRate > 0 || lastTrans > 2 || (valveStatus == "closed" && lastTrans > 1)) {
     lastTrans = 0;
     return reading;
   } else {
@@ -124,8 +98,39 @@ String readSensor(bool forceSend) {
   }
 }
 
-void waitForGPSFix() {
+void readFlow() {
+  detachInterrupt(digitalPinToInterrupt(SENSOR_PIN));
+
+  // Because this loop may not complete in exactly 1 second intervals we calculate
+  // the number of milliseconds that have passed since the last execution and use
+  // that to scale the output. We also apply the calibrationFactor to scale the output
+  // based on the number of pulses per second per units of measure (litres/minute in
+  // this case) coming from the sensor.
+  flowRate = ((1000.0 / (millis() - lastReading)) * pulseCount) / calibrationFactor;
+
+  // Note the time this processing pass was executed. Note that because we've
+  // disabled interrupts the millis() function won't actually be incrementing right
+  // at this point, but it will still return the value it was set to just before
+  // interrupts went away.
+  lastReading = millis();
+
+  // Divide the flow rate in litres/minute by 60 to determine how many litres have
+  // passed through the sensor in this 1 second interval, then multiply by 1000 to
+  // convert to millilitres.
+  flowMilliLitres = (flowRate / 60) * 1000;
+  if (totalMilliLitres > 100000) {
+    totalMilliLitres = 0;
+  }
+  totalMilliLitres += flowMilliLitres;
+
+  pulseCount = 0;
+  // Enable the interrupt again now that we've finished sending output
+  attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
+}
+
+void readGPS() {
   uint8_t GPSchar;
+  float startTime = millis();
   while (1) {
     if (Serial1.available() > 0) {
       GPSchar = Serial1.read();
@@ -133,6 +138,7 @@ void waitForGPSFix() {
     }
 
     if (gps.location.isUpdated() && gps.altitude.isUpdated()) {
+//    if (gps.hdop.isUpdated()) {
       lat = gps.location.lat();
       lng = gps.location.lng();
       alt = gps.altitude.meters();
@@ -144,7 +150,12 @@ void waitForGPSFix() {
   }
 }
 
-// Insterrupt Service Routine
+String readTemperature() {
+  temperatureSensor.requestTemperatures();
+  return String(temperatureSensor.getTempCByIndex(0));
+}
+
+// Interrupt Service Routine
 void pulseCounter() {
   pulseCount++;
 }
@@ -186,7 +197,6 @@ void activateMotor() {
 void deactivateMotor() {
   digitalWrite(ENABLE_PIN, LOW);
   valveStatus = "open";
-  readAndSend(true);
 }
 
 String readBattery() {
