@@ -17,7 +17,7 @@ print(api)
 print(broker)
 
 env = dotenv_values(".env")
-print(env)
+print(env.MQTT_USER)
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
