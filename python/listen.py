@@ -16,7 +16,7 @@ if args.dev:
 print(api)
 print(broker)
 
-env = dotenv_values(".env")
+env = dotenv_values("./.env")
 print(env.MQTT_USER)
 
 # CONNACK received from the server.
