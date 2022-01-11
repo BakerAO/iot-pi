@@ -1,4 +1,4 @@
-from dotenv import dotenv_values # pip3 install python-dotenv
+from dotenv import dotenv_values, find_dotenv # pip3 install python-dotenv
 import paho.mqtt.client as mqtt # pip3 install paho-mqtt
 import serial # pip3 install pyserial
 import requests
@@ -16,8 +16,7 @@ if args.dev:
 print(api)
 print(broker)
 
-env = dotenv_values("./.env")
-print(env.MQTT_USER)
+env = dotenv_values(find_dotenv())
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
@@ -32,7 +31,7 @@ def on_message(client, userdata, msg):
   port.write(payload.encode())
 
 client = mqtt.Client()
-client.username_pw_set(env.MQTT_USER, env.MQTT_PW)
+client.username_pw_set(env['MQTT_USER'], env['MQTT_PW'])
 client.on_connect = on_connect
 client.on_message = on_message
 client.connect(broker, 1883, 60)
