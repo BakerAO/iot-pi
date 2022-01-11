@@ -17,6 +17,7 @@ print(api)
 print(broker)
 
 env = dotenv_values(".env")
+print(env)
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
