@@ -9,7 +9,7 @@ argParser.add_argument('-dev', default=False, action='store_true')
 args = argParser.parse_args()
 broker = 'broker.tidoba.com'
 port = serial.Serial('/dev/ttyACM0', 115200)
-api = 'https://api.innov8.host/devices'
+api = 'http://api.tidoba.com/devices'
 if args.dev:
   api = 'http://10.0.0.5:8081/devices'
   broker = '10.0.0.5'
