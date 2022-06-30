@@ -7,7 +7,7 @@ import argparse
 argParser = argparse.ArgumentParser()
 argParser.add_argument('-dev', default=False, action='store_true')
 args = argParser.parse_args()
-broker = 'broker.innov8.host'
+broker = 'broker.tidoba.com'
 port = serial.Serial('/dev/ttyACM0', 115200)
 api = 'https://api.innov8.host/devices'
 if args.dev:
