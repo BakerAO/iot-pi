@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt # pip3 install paho-mqtt
 
 env = dotenv_values(find_dotenv())
 broker = env['MQTT_BROKER']
-port = env['MQTT_PORT']
+port = int(env['MQTT_PORT'])
 user = env['MQTT_USER']
 password = env['MQTT_PASSWORD']
 
