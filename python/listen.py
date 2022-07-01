@@ -4,10 +4,15 @@ import serial # pip3 install pyserial
 import requests
 import argparse
 
+env = dotenv_values(find_dotenv())
+broker = env['MQTT_BROKER']
+port = env['MQTT_PORT']
+user = env['MQTT_USER']
+password = env['MQTT_PASSWORD']
+
 argParser = argparse.ArgumentParser()
 argParser.add_argument('-dev', default=False, action='store_true')
 args = argParser.parse_args()
-broker = 'broker.tidoba.com'
 port = serial.Serial('/dev/ttyACM0', 115200)
 api = 'http://api.tidoba.com/devices'
 if args.dev:
@@ -15,8 +20,6 @@ if args.dev:
   broker = '10.0.0.5'
 print(api)
 print(broker)
-
-env = dotenv_values(find_dotenv())
 
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
@@ -31,10 +34,10 @@ def on_message(client, userdata, msg):
   port.write(payload.encode())
 
 client = mqtt.Client()
-client.username_pw_set(env['MQTT_USER'], env['MQTT_PW'])
+client.username_pw_set(user, password)
 client.on_connect = on_connect
 client.on_message = on_message
-client.connect(broker, 1883, 60)
+client.connect(broker, port)
 client.loop_start()
 
 while True:
