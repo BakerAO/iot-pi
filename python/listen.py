@@ -7,7 +7,7 @@ import requests
 env = dotenv_values(find_dotenv())
 clientId = env['CLIENT_ID']
 broker = env['MQTT_BROKER']
-mqttPort = env['MQTT_PORT']
+mqttPort = int(env['MQTT_PORT'])
 user = env['MQTT_USER']
 password = env['MQTT_PASSWORD']
 api = 'http://api.tidoba.com/devices'
