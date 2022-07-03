@@ -19,14 +19,23 @@ void setup() {
   rf95.init();
   rf95.setFrequency(RF95_FREQ);
   rf95.setTxPower(23, false);
-  Serial.begin(115200);
 }
 
 void loop() {
-  String message = "{ \"testing\": 123 }";
-  Serial.println(message);
-  sendMessage(message);
-  delay(15000);
+  readAndSend();
+  delay(1000);
+}
+
+void readAndSend() {
+  String reading = readSensors();
+  if (reading.length() > 0) {
+    sendMessage(reading);
+  }
+}
+
+String readSensors() {
+  String reading = "{ \"deviceId\": 10001 }";
+  return reading;
 }
 
 void sendMessage(String message) {

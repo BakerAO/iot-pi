@@ -6,12 +6,13 @@
 #define RFM95_RST 4
 #define RFM95_INT 3
 #define RF95_FREQ 915.0
-#define DHT_PIN 16 // A2
+#define DHT_PIN 12
 #define DHT_TYPE DHT11
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 DHT dht(DHT_PIN, DHT_TYPE);
-String deviceId = "20001";
+
+String deviceId = "10001";
 unsigned long lastTrans;
 
 void setup() {
@@ -34,6 +35,7 @@ void loop() {
   if (millis() > lastTrans + 30000) {
     String message = readSensor();
     sendMessage(message);
+//    Serial.println(message);
     lastTrans = millis();
   }
 }
