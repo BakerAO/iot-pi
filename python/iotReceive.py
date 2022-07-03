@@ -2,7 +2,7 @@ import serial
 import requests
 
 port = serial.Serial('/dev/ttyACM0', 115200)
-url = "https://api.innov8.host/devices"
+url = "https://api.tidoba.com/devices"
 # url = "http://10.0.0.142:8081/devices"
 
 while True:
