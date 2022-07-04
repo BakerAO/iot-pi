@@ -13,9 +13,8 @@ TinyGPSPlus gps;
 
 String deviceId = "10003";
 String valveStatus = "open";
-unsigned long lastTrans = 0, lastReading = 0;
 float lat, lng, alt, tempHDOP;
-uint32_t hdop, sats;
+uint32_t hdop, sats, lastTrans = 0;
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -53,10 +52,11 @@ void readAndSend() {
 
 String readSensors() {
   String reading = "";
-  if ((millis() - lastReading) > 10000) {
+  if ((millis() - lastTrans) > 10000) {
     readGPS();
 
-    reading += "{ \"device_id\": " + deviceId;
+    reading += "{ \"type\": \"simple_motor\"";
+    reading += ", \"device_id\": " + deviceId;
     reading += ", \"battery\": " + readBattery();
     reading += ", \"valve_status\": \"" + valveStatus + "\"";
     reading += ", \"latitude\": " + String(lat, 8);
@@ -66,16 +66,11 @@ String readSensors() {
     reading += ", \"hdop\": " + String(tempHDOP, 2);
     reading += " }";
 
-    lastTrans++;
+    lastTrans = millis();
+    return reading;
   }
 
-  if (lastTrans > 2 || (valveStatus == "closed" && lastTrans > 1)) {
-    lastTrans = 0;
-    lastReading = millis();
-    return reading;
-  } else {
-    return "";
-  }
+  return "";
 }
 
 void readGPS() {
