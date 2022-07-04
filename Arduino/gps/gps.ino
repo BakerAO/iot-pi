@@ -1,5 +1,5 @@
-#include <TinyGPS++.h>
 #include <RH_RF95.h>
+#include <TinyGPS++.h>
 
 #define VBAT_PIN A7 // 12
 #define RFM95_CS 8
@@ -8,10 +8,11 @@
 #define RF95_FREQ 915.0
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
-String deviceId = "10003";
 TinyGPSPlus gps;
+
+String deviceId = "10003";
 float lat, lng, alt, tempHDOP;
-uint32_t hdop, sats, startTime, sendTime, lastTrans;
+uint32_t hdop, sats, lastTrans;
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -29,20 +30,21 @@ void setup() {
   lastTrans = 0;
   Serial1.begin(9600);
 //  Serial.begin(115200);
+  delay(2000);
+  readGPS();
 }
 
 void loop() {
-  if (lastTrans + 30000 < millis()) {
-    gpsWaitFix();
+  if (lastTrans + 10000 < millis()) {
+    readGPS();
     readAndSend();
     lastTrans = millis();
   }
   delay(1000);
 }
 
-void gpsWaitFix() {
+void readGPS() {
   uint8_t GPSchar;
-  startTime = millis();
   while (1) {
     if (Serial1.available() > 0) {
       GPSchar = Serial1.read();
@@ -64,7 +66,6 @@ void gpsWaitFix() {
 
 void readAndSend() {
   String reading = "";
-  int timeLength = sendTime - startTime;
 
   reading += "{ \"device_id\": " + deviceId;
   reading += ", \"battery\": " + readBattery();
