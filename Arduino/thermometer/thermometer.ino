@@ -44,7 +44,8 @@ String readSensor() {
   float temperature = dht.readTemperature();
   float humidity = dht.readHumidity();
   String reading = "";
-  reading += "{ \"device_id\": " + deviceId;
+  reading += "{ \"type\": \"thermometer\"";
+  reading += ", \"device_id\": " + deviceId;
   reading += ", \"battery\": " + readBattery();
   reading += ", \"temperature\": " + String(temperature);
   reading += ", \"humidity\": " + String(humidity) + " }";
