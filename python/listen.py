@@ -10,7 +10,7 @@ broker = env['MQTT_BROKER']
 mqttPort = int(env['MQTT_PORT'])
 user = env['MQTT_USER']
 password = env['MQTT_PASSWORD']
-api = 'http://api.tidoba.com/devices'
+api = 'http://' + env['API'] + '/devices'
 
 serialPort = serial.Serial('/dev/ttyACM0', 115200)
 
