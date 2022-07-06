@@ -26,7 +26,11 @@ print(broker)
 # CONNACK received from the server.
 def on_connect(client, userdata, flags, rc):
   print("Connected with result code " + str(rc))
-  client.subscribe("1/water_flow")
+  topicWaterFlow = clientId + "/water_flow"
+  topicSimpleMotors = clientId + "/simple_motors"
+  client.subscribe(topicWaterFlow)
+  client.subscribe(topicSimpleMotors)
+  client.publish(topicSimpleMotors, "hello from pi")
 
 # PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
