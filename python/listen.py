@@ -30,7 +30,6 @@ def on_connect(client, userdata, flags, rc):
   topicSimpleMotors = clientId + "/simple_motors"
   client.subscribe(topicWaterFlow)
   client.subscribe(topicSimpleMotors)
-  client.publish(topicSimpleMotors, "hello from pi")
 
 # PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
