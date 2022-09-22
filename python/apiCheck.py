@@ -8,6 +8,6 @@ api = 'http://' + env['API'] + '/devices'
 try:
     print(api)
     response = requests.get(api)
-    print(response)
+    print(response.json())
 except:
     print('Error')
