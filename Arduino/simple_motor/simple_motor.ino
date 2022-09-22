@@ -11,7 +11,7 @@
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 TinyGPSPlus gps;
 
-String deviceId = "10003";
+String deviceId = "10004";
 String valveStatus = "open";
 float lat, lng, alt, tempHDOP;
 uint32_t hdop, sats, lastTrans = 0;
@@ -32,6 +32,8 @@ void setup() {
   pinMode(ENABLE_PIN, OUTPUT);
   Serial1.begin(9600);
 //  Serial.begin(115200);
+  delay(2000);
+  sendMessage("{ \"startup\": \"10004\" }");
   delay(2000);
   readGPS();
 }
