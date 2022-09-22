@@ -6,7 +6,7 @@ env = dotenv_values(find_dotenv())
 api = 'http://' + env['API'] + '/devices'
 
 try:
-    print('Send Request')
+    print(api)
     response = requests.get(api)
     print(response)
 except:
