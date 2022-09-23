@@ -8,6 +8,6 @@ api = 'http://' + env['API']
 try:
     print(api)
     response = requests.get(api)
-    print(response.json())
+    print(response)
 except:
     print('Error')
