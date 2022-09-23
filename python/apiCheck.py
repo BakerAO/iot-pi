@@ -3,7 +3,7 @@ import requests
 from time import sleep
 
 env = dotenv_values(find_dotenv())
-api = 'http://' + env['API'] + '/devices'
+api = 'http://' + env['API']
 
 try:
     print(api)
