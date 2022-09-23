@@ -2,7 +2,6 @@ from dotenv import dotenv_values, find_dotenv # pip3 install python-dotenv
 import paho.mqtt.client as mqtt # pip3 install paho-mqtt
 import serial # pip3 install pyserial
 import requests
-# import argparse
 
 env = dotenv_values(find_dotenv())
 clientId = env['CLIENT_ID']
@@ -14,12 +13,6 @@ api = env['API'] + '/devices'
 
 serialPort = serial.Serial('/dev/ttyACM0', 115200)
 
-# argParser = argparse.ArgumentParser()
-# argParser.add_argument('-dev', default=False, action='store_true')
-# args = argParser.parse_args()
-# if args.dev:
-#   api = 'http://10.0.0.5:8081/devices'
-#   broker = '10.0.0.5'
 print(api)
 print(broker)
 
@@ -56,4 +49,4 @@ while True:
         print(rcvString)
         print(response)
     except:
-      print('Error')
+      print('Error Here')
